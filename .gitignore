@@ -1,0 +1,28 @@
+
+# Dependencies
+/node_modules
+
+# Build output
+/dist
+
+# Environment variables
+.env
+
+# Logs
+npm-debug.log*
+*.log
+
+# IDE specific
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Uploads
+/uploads/
+
+# .md files
+GEMINI.md
+README-private.md
