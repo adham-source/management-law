@@ -118,7 +118,7 @@ router.post('/login', validate(loginSchema), authController.login);
  *       401:
  *         description: رمز التحديث غير صالح.
  */
-router.post('/refresh-token', authController.refreshAccessToken);
+router.post('/refresh-token', authController.refreshToken);
 
 /**
  * @swagger

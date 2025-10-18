@@ -1,5 +1,6 @@
 
 import { Request, Response } from 'express';
+import { IUser } from '../models/User.model';
 import * as authService from '../services/auth.service';
 import { generateTokens } from '../utils/jwt.utils';
 import asyncHandler from '../utils/asyncHandler';
@@ -43,7 +44,7 @@ export const googleCallback = (req: Request, res: Response) => {
     if (!req.user) {
         return res.status(401).json({ message: 'User not authenticated' });
     }
-    const user = req.user as any; 
+    const user = req.user as IUser; // Explicit type assertion
     const tokens = generateTokens(user._id.toString());
     res.status(200).json({ user, ...tokens });
 };
@@ -64,6 +65,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user || !refreshToken) {
     return res.status(400).json({ message: 'User and refresh token are required' });
   }
-  await authService.logoutUser(req.user._id, refreshToken);
+  const user = req.user as IUser; // Explicit type assertion
+  await authService.logoutUser(user._id, refreshToken);
   res.status(200).json({ message: 'Logged out successfully' });
 });

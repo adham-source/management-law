@@ -1,6 +1,6 @@
 
 import { Request, Response, NextFunction } from 'express';
-import User from '../models/User.model';
+import User, { IUser } from '../models/User.model';
 import Role, { IRole } from '../models/Role.model';
 import Permission, { IPermission } from '../models/Permission.model';
 
@@ -8,10 +8,11 @@ export const authorize = (requiredPermissions: string[]) => async (req: Request,
   if (!req.user) {
     return res.status(401).json({ message: 'Authentication required' });
   }
+  const user = req.user as IUser; // Explicit type assertion
 
   try {
     // Fetch the user with their role populated
-    const userWithRole = await User.findById(req.user._id).populate<{ role: IRole }>({ // Explicitly type the populated field
+    const userWithRole = await User.findById(user._id).populate<{ role: IRole }>({ // Explicitly type the populated field
       path: 'role',
       model: Role,
       populate: {

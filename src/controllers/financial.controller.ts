@@ -1,5 +1,6 @@
 
 import { Request, Response } from 'express';
+import { IUser } from '../models/User.model';
 import asyncHandler from '../utils/asyncHandler';
 import * as expenseService from '../services/expense.service';
 import * as invoiceService from '../services/invoice.service';
@@ -8,7 +9,8 @@ import * as paymentService from '../services/payment.service';
 // --- Expense Controllers ---
 export const addExpense = asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) return res.status(401).json({ message: 'Not authorized' });
-    const expense = await expenseService.addExpense(req.body, req.user._id);
+    const user = req.user as IUser;
+    const expense = await expenseService.addExpense(req.body, user._id);
     res.status(201).json(expense);
 });
 
@@ -21,8 +23,9 @@ export const getCaseExpenses = asyncHandler(async (req: Request, res: Response) 
 // --- Invoice Controllers ---
 export const generateInvoice = asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) return res.status(401).json({ message: 'Not authorized' });
+    const user = req.user as IUser;
     const { relatedCase, dueDate, tax } = req.body;
-    const invoice = await invoiceService.generateInvoiceForCase(relatedCase, dueDate, tax, req.user._id);
+    const invoice = await invoiceService.generateInvoiceForCase(relatedCase, dueDate, tax, user._id);
     res.status(201).json(invoice);
 });
 
@@ -42,6 +45,7 @@ export const getCaseInvoices = asyncHandler(async (req: Request, res: Response) 
 // --- Payment Controllers ---
 export const recordPayment = asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) return res.status(401).json({ message: 'Not authorized' });
-    const payment = await paymentService.recordPayment(req.body, req.user._id);
+    const user = req.user as IUser;
+    const payment = await paymentService.recordPayment(req.body, user._id);
     res.status(201).json(payment);
 });

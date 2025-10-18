@@ -29,41 +29,49 @@ passport.use(
 );
 
 // Google OAuth 2.0 Strategy
-const googleOptions = {
-  clientID: process.env.GOOGLE_CLIENT_ID || '',
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-  callbackURL: process.env.GOOGLE_REDIRECT_URI || '/api/auth/google/callback',
-};
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } = process.env;
 
-passport.use(
-  new GoogleStrategy(googleOptions, async (accessToken, refreshToken, profile, done) => {
-    try {
-      let user = await User.findOne({ googleId: profile.id });
+if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: GOOGLE_REDIRECT_URI || '/api/auth/google/callback',
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        try {
+          let user = await User.findOne({ googleId: profile.id });
 
-      if (user) {
-        return done(null, user);
+          if (user) {
+            return done(null, user);
+          }
+
+          user = await User.findOne({ email: profile._json.email });
+
+          if (user) {
+            user.googleId = profile.id;
+            await user.save();
+            return done(null, user);
+          }
+
+          const newUser = await User.create({
+            googleId: profile.id,
+            name: profile.displayName,
+            email: profile._json.email,
+            role: 'client',
+          });
+
+          return done(null, newUser);
+        } catch (error) {
+          return done(error, false);
+        }
       }
-
-      user = await User.findOne({ email: profile._json.email });
-
-      if (user) {
-        user.googleId = profile.id;
-        await user.save();
-        return done(null, user);
-      }
-
-      const newUser = await User.create({
-        googleId: profile.id,
-        name: profile.displayName,
-        email: profile._json.email,
-        role: 'client',
-      });
-
-      return done(null, newUser);
-    } catch (error) {
-      return done(error, false);
-    }
-  })
-);
+    )
+  );
+  console.log('Google OAuth strategy configured.');
+} else {
+  console.warn('Google OAuth environment variables not set. Google login will be disabled.');
+}
 
 export default passport;
