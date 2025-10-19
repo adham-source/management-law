@@ -12,6 +12,11 @@ export interface IUser extends Document {
   hourlyRate?: number;
   role: IRole | mongoose.Types.ObjectId; // Reference to Role model
   refreshTokens?: string[];
+  googleCalendarTokens?: {
+    accessToken: string;
+    refreshToken: string;
+    expiryDate: number;
+  };
   isVerified: boolean;
   verificationToken?: string;
   verificationTokenExpires?: Date;
@@ -41,6 +46,7 @@ const UserSchema: Schema<IUser> = new Schema(
     googleId: {
       type: String,
       required: false,
+      index: true,
     },
     hourlyRate: {
         type: Number,
@@ -52,6 +58,11 @@ const UserSchema: Schema<IUser> = new Schema(
       required: true,
     },
     refreshTokens: [String],
+    googleCalendarTokens: {
+      accessToken: { type: String },
+      refreshToken: { type: String },
+      expiryDate: { type: Number },
+    },
     isVerified: {
       type: Boolean,
       default: false,

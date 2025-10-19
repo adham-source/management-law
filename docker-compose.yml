@@ -1,0 +1,54 @@
+
+version: '3.8'
+
+services:
+  # The Node.js Application Service
+  app:
+    build: .
+    container_name: law_office_app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - law-network
+
+  # MongoDB Database Service
+  mongo:
+    image: mongo:7.0
+    container_name: law_office_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    networks:
+      - law-network
+
+  # Redis Caching Service
+  redis:
+    image: redis:7-alpine
+    container_name: law_office_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - law-network
+
+# Define the network
+networks:
+  law-network:
+    driver: bridge
+
+# Define the volumes for data persistence
+volumes:
+  mongo-data:
+  redis-data:

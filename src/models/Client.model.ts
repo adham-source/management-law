@@ -36,6 +36,7 @@ const ClientSchema: Schema<IClient> = new Schema(
       type: String,
       required: true,
       trim: true,
+      index: true,
     },
     nationalId: {
       type: String,
@@ -84,6 +85,7 @@ const ClientSchema: Schema<IClient> = new Schema(
       type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
+      index: true,
     },
   },
   { timestamps: true }

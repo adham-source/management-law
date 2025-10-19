@@ -13,7 +13,7 @@ export interface INotification extends Document {
 
 const NotificationSchema: Schema<INotification> = new Schema(
   {
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    user: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     message: { type: String, required: true },
     link: { type: String },
     isRead: { type: Boolean, default: false },

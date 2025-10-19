@@ -34,7 +34,7 @@ export interface IInvoice extends Document {
 const InvoiceSchema: Schema<IInvoice> = new Schema(
   {
     invoiceNumber: { type: String, required: true, unique: true },
-    relatedCase: { type: Schema.Types.ObjectId, ref: 'Case', required: true },
+    relatedCase: { type: Schema.Types.ObjectId, ref: 'Case', required: true, index: true },
     relatedClient: { type: Schema.Types.ObjectId, ref: 'Client', required: true },
     issueDate: { type: Date, default: Date.now },
     dueDate: { type: Date, required: true },
@@ -54,7 +54,7 @@ const InvoiceSchema: Schema<IInvoice> = new Schema(
     tax: { type: Number, default: 0 },
     total: { type: Number, required: true },
     amountPaid: { type: Number, default: 0 },
-    status: { type: String, enum: invoiceStatuses, default: 'draft' },
+    status: { type: String, enum: invoiceStatuses, default: 'draft', index: true },
     notes: { type: String },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },

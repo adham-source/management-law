@@ -73,6 +73,9 @@ const permissionsToCreate = [
   { name: 'invoice:create', description: 'Create invoices' },
   { name: 'invoice:read', description: 'Read invoices' },
   { name: 'payment:create', description: 'Create payments' },
+
+  // Audit Management
+  { name: 'audit:read', description: 'Read audit logs' },
 ];
 
 const rolesToCreate = [

@@ -29,7 +29,7 @@ passport.use(
 );
 
 // Google OAuth 2.0 Strategy
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } = process.env;
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_AUTH_REDIRECT_URI } = process.env;
 
 if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
   passport.use(
@@ -37,7 +37,7 @@ if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
       {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: GOOGLE_REDIRECT_URI || '/api/auth/google/callback',
+        callbackURL: GOOGLE_AUTH_REDIRECT_URI,
       },
       async (accessToken, refreshToken, profile, done) => {
         try {

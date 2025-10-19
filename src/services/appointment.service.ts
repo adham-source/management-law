@@ -1,19 +1,35 @@
-
 import Appointment, { IAppointment } from '../models/Appointment.model';
-import { z } from 'zod';
-import { createAppointmentSchema, updateAppointmentSchema } from '../validations/appointment.validation';
 import mongoose from 'mongoose';
+import * as googleCalendarService from './googleCalendar.service';
 
 // Create Appointment Service
 export const createAppointment = async (
-  input: z.infer<typeof createAppointmentSchema>['body'],
+  input: Partial<IAppointment>,
   userId: mongoose.Types.ObjectId
 ): Promise<IAppointment> => {
   const appointmentData = { ...input, createdBy: userId };
-  return Appointment.create(appointmentData);
+  const appointment = await Appointment.create(appointmentData);
+
+  // Integrate with Google Calendar
+  try {
+    const populatedAppointment = await appointment.populate('attendees', 'email');
+    const googleEventId = await googleCalendarService.createCalendarEvent(userId, populatedAppointment);
+    if (googleEventId) {
+      appointment.googleEventId = googleEventId;
+      await appointment.save();
+    } else {
+      console.warn(`Could not get Google Calendar Event ID for appointment ${appointment._id}`);
+    }
+  } catch (error) {
+    console.error('Failed to create Google Calendar event:', error);
+    // We don't throw an error here, the main operation succeeded.
+    // Maybe add a flag to the appointment to indicate sync failure.
+  }
+
+  return appointment;
 };
 
-// Get Appointments Service (e.g., for a specific user within a date range)
+// Get Appointments Service
 export const getAppointments = async (
   userId: mongoose.Types.ObjectId,
   filter: any,
@@ -21,10 +37,7 @@ export const getAppointments = async (
   limit: number,
   skip: number
 ): Promise<IAppointment[]> => {
-  const baseQuery: any = {
-    $or: [{ createdBy: userId }, { attendees: userId }],
-  };
-
+  const baseQuery: any = { $or: [{ createdBy: userId }, { attendees: userId }] };
   return Appointment.find({ ...baseQuery, ...filter })
     .populate('attendees', 'name email')
     .populate('relatedCase', 'caseNumber title')
@@ -44,10 +57,21 @@ export const getAppointmentById = async (
 // Update Appointment Service
 export const updateAppointment = async (
   appointmentId: string,
-  update: z.infer<typeof updateAppointmentSchema>['body'],
+  update: Partial<IAppointment>,
   userId: mongoose.Types.ObjectId
 ): Promise<IAppointment | null> => {
-  return Appointment.findOneAndUpdate({ _id: appointmentId, createdBy: userId }, update, { new: true });
+  const appointment = await Appointment.findOneAndUpdate({ _id: appointmentId, createdBy: userId }, update, { new: true });
+
+  if (appointment && appointment.googleEventId) {
+    try {
+        const populatedAppointment = await appointment.populate('attendees', 'email');
+        await googleCalendarService.updateCalendarEvent(userId, appointment.googleEventId, populatedAppointment);
+    } catch (error) {
+        console.error('Failed to update Google Calendar event:', error);
+    }
+  }
+
+  return appointment;
 };
 
 // Delete Appointment Service
@@ -55,5 +79,15 @@ export const deleteAppointment = async (
   appointmentId: string,
   userId: mongoose.Types.ObjectId
 ): Promise<IAppointment | null> => {
-  return Appointment.findOneAndDelete({ _id: appointmentId, createdBy: userId });
+  const appointment = await Appointment.findOneAndDelete({ _id: appointmentId, createdBy: userId });
+
+  if (appointment && appointment.googleEventId) {
+    try {
+        await googleCalendarService.deleteCalendarEvent(userId, appointment.googleEventId);
+    } catch (error) {
+        console.error('Failed to delete Google Calendar event:', error);
+    }
+  }
+
+  return appointment;
 };

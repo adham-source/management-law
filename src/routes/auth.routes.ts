@@ -3,6 +3,7 @@ import passport from 'passport';
 import * as authController from '../controllers/auth.controller';
 import validate from '../middlewares/validate';
 import { registerSchema, loginSchema, clientRegisterSchema, verifyEmailSchema } from '../validations/auth.validation';
+import { authLimiter } from '../middlewares/rateLimiter';
 
 const router = Router();
 
@@ -44,7 +45,7 @@ const router = Router();
  *       400:
  *         description: البريد الإلكتروني مستخدم بالفعل أو خطأ في المدخلات.
  */
-router.post('/register/client', validate(clientRegisterSchema), authController.clientRegister);
+router.post('/register/client', authLimiter, validate(clientRegisterSchema), authController.clientRegister);
 
 /**
  * @swagger
@@ -69,7 +70,7 @@ router.post('/register/client', validate(clientRegisterSchema), authController.c
  *       400:
  *         description: الرمز غير صالح أو انتهت صلاحيته.
  */
-router.post('/verify-email', validate(verifyEmailSchema), authController.verifyEmail);
+router.post('/verify-email', authLimiter, validate(verifyEmailSchema), authController.verifyEmail);
 
 /**
  * @swagger
@@ -93,7 +94,7 @@ router.post('/verify-email', validate(verifyEmailSchema), authController.verifyE
  *       401:
  *         description: بيانات الدخول غير صحيحة أو الحساب غير مفعل.
  */
-router.post('/login', validate(loginSchema), authController.login);
+router.post('/login', authLimiter, validate(loginSchema), authController.login);
 
 /**
  * @swagger

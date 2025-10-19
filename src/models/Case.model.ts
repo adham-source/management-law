@@ -45,11 +45,13 @@ const CaseSchema: Schema<ICase> = new Schema(
       type: String,
       enum: caseTypes,
       required: true,
+      index: true,
     },
     status: {
       type: String,
       enum: caseStatuses,
       default: 'open',
+      index: true,
     },
     court: {
       type: String,
@@ -60,6 +62,7 @@ const CaseSchema: Schema<ICase> = new Schema(
         type: Schema.Types.ObjectId,
         ref: 'Client',
         required: true,
+        index: true,
       },
     ],
     assignedLawyers: [
@@ -67,6 +70,7 @@ const CaseSchema: Schema<ICase> = new Schema(
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true,
+        index: true,
       },
     ],
     openingDate: {

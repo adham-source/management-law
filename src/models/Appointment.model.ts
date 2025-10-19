@@ -31,6 +31,7 @@ const AppointmentSchema: Schema<IAppointment> = new Schema(
     startTime: {
       type: Date,
       required: true,
+      index: true,
     },
     endTime: {
       type: Date,
@@ -45,6 +46,7 @@ const AppointmentSchema: Schema<IAppointment> = new Schema(
     relatedCase: {
       type: Schema.Types.ObjectId,
       ref: 'Case',
+      index: true,
     },
     location: {
       type: String,
@@ -54,6 +56,7 @@ const AppointmentSchema: Schema<IAppointment> = new Schema(
         type: String,
         enum: ['scheduled', 'completed', 'canceled', 'rescheduled'],
         default: 'scheduled',
+        index: true,
     },
     googleEventId: {
         type: String,

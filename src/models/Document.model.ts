@@ -27,6 +27,7 @@ const DocumentSchema: Schema<IDocument> = new Schema(
     relatedCase: {
       type: Schema.Types.ObjectId,
       ref: 'Case',
+      index: true,
     },
     relatedClient: {
       type: Schema.Types.ObjectId,

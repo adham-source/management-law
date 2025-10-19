@@ -14,10 +14,13 @@ import roleRoutes from './routes/role.routes';
 import userRoutes from './routes/user.routes';
 import notificationRoutes from './routes/notification.routes';
 import financialRoutes from './routes/financial.routes';
+import auditRoutes from './routes/audit.routes';
+import googleRoutes from './routes/google.routes';
 import { startDeadlineChecker } from './jobs/deadlineChecker';
 import errorHandler from './middlewares/errorHandler';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.config';
+import { generalLimiter } from './middlewares/rateLimiter';
 
 const app: Application = express();
 
@@ -42,6 +45,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 });
 
 // API Routes - v1
+app.use('/api/v1', generalLimiter);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/roles', roleRoutes);
@@ -53,6 +57,8 @@ app.use('/api/v1/appointments', appointmentRoutes);
 app.use('/api/v1/tasks', taskRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/financials', financialRoutes);
+app.use('/api/v1/audit', auditRoutes);
+app.use('/api/v1/google', googleRoutes);
 
 // Start background jobs
 startDeadlineChecker();
