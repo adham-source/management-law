@@ -9,3 +9,7 @@ export const addExpense = async (input: Partial<IExpense>, userId: mongoose.Type
 export const getExpensesForCase = async (caseId: string): Promise<IExpense[]> => {
     return Expense.find({ relatedCase: caseId });
 };
+
+export const getAllExpenses = async (filter: any, sort: any, limit: number, skip: number): Promise<IExpense[]> => {
+    return Expense.find(filter).sort(sort).limit(limit).skip(skip);
+};

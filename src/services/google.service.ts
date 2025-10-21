@@ -1,25 +1,18 @@
 import { google } from 'googleapis';
-import User from '../models/User.model';
+import { env } from '../config/env';
 import mongoose from 'mongoose';
+import User from '../models/User.model';
 import AppError from '../utils/AppError';
 
-// --- Configuration & Constants ---
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALENDAR_REDIRECT_URI } = process.env;
-
-const GOOGLE_CALENDAR_SCOPES = [
-    'https://www.googleapis.com/auth/calendar'
-];
-
-// --- OAuth2 Client Initialization ---
-if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !GOOGLE_CALENDAR_REDIRECT_URI) {
-    console.warn('Google OAuth environment variables for Calendar integration are not fully set.');
-}
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALENDAR_REDIRECT_URI } = env;
 
 export const oauth2Client = new google.auth.OAuth2(
-    GOOGLE_CLIENT_ID,
-    GOOGLE_CLIENT_SECRET,
-    GOOGLE_CALENDAR_REDIRECT_URI
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_CALENDAR_REDIRECT_URI
 );
+
+const GOOGLE_CALENDAR_SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
 // --- Service Functions ---
 

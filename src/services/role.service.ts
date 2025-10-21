@@ -1,5 +1,5 @@
 import Role, { IRole } from '../models/Role.model';
-import redisClient from '../config/redis.config';
+import { redis as redisClient } from '../config/redis.config';
 import mongoose from 'mongoose';
 
 const ROLE_CACHE_KEY = 'cache:roles';

@@ -17,7 +17,6 @@ const router = Router();
 
 // Protect all user routes
 router.use(passport.authenticate('jwt', { session: false }));
-router.use(authorize(['user:manage'])); // Only admins with this permission can manage users
 
 /**
  * @swagger
@@ -33,7 +32,7 @@ router.use(authorize(['user:manage'])); // Only admins with this permission can 
  *       403:
  *         description: غير مصرح به.
  */
-router.get('/', userController.getAllUsers);
+router.get('/', authorize(['user:read']), userController.getAllUsers);
 
 /**
  * @swagger
@@ -58,7 +57,7 @@ router.get('/', userController.getAllUsers);
  *       403:
  *         description: غير مصرح به.
  */
-router.get('/:id', userController.getUserById);
+router.get('/:id', authorize(['user:read']), userController.getUserById);
 
 /**
  * @swagger
@@ -80,7 +79,7 @@ router.get('/:id', userController.getUserById);
  *       403:
  *         description: غير مصرح به.
  */
-router.post('/', validate(createUserSchema), userController.createUser);
+router.post('/', authorize(['user:create']), validate(createUserSchema), userController.createUser);
 
 /**
  * @swagger
@@ -111,7 +110,7 @@ router.post('/', validate(createUserSchema), userController.createUser);
  *       403:
  *         description: غير مصرح به.
  */
-router.patch('/:id', validate(updateUserSchema), userController.updateUser);
+router.patch('/:id', authorize(['user:update']), validate(updateUserSchema), userController.updateUser);
 
 /**
  * @swagger
@@ -136,7 +135,7 @@ router.patch('/:id', validate(updateUserSchema), userController.updateUser);
  *       403:
  *         description: غير مصرح به.
  */
-router.delete('/:id', userController.deleteUser);
+router.delete('/:id', authorize(['user:delete']), userController.deleteUser);
 
 export default router;
 

@@ -14,9 +14,14 @@ const router = Router();
  *   description: إدارة صلاحيات النظام (للمدير فقط)
  */
 
-// Protect all permission routes
 router.use(passport.authenticate('jwt', { session: false }));
-router.use(authorize(['permission:manage']));
+
+/**
+ * @swagger
+ * tags:
+ *   name: الصلاحيات (Permissions)
+ *   description: إدارة صلاحيات النظام (للمدير فقط)
+ */
 
 /**
  * @swagger
@@ -30,7 +35,7 @@ router.use(authorize(['permission:manage']));
  *       200:
  *         description: قائمة بجميع الصلاحيات.
  */
-router.get('/', permissionController.getAllPermissions);
+router.get('/', authorize(['permission:read']), permissionController.getAllPermissions);
 
 /**
  * @swagger
@@ -55,6 +60,8 @@ router.get('/', permissionController.getAllPermissions);
  *       201:
  *         description: تم إنشاء الصلاحية بنجاح.
  */
+// This route is intentionally left without authorization as it's for seeding/dev purposes
+// and is discouraged for production use.
 router.post('/', validate(createPermissionSchema), permissionController.createPermission);
 
 export default router;

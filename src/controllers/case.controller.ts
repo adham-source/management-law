@@ -37,9 +37,9 @@ export const getCaseById = asyncHandler(async (req: Request, res: Response) => {
 export const updateCase = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) return res.status(401).json({ message: 'Not authorized' });
   const user = req.user as IUser;
-  const caseItem = await caseService.updateCase(req.params.id, req.body, user._id);
+  const caseItem = await caseService.updateCase(req.params.id, req.body, user);
   if (!caseItem) {
-    return res.status(404).json({ message: 'Case not found' });
+    return res.status(404).json({ message: 'Case not found or not authorized' });
   }
   await logActivity({ user: user._id, action: 'UPDATE_CASE', targetResourceId: caseItem._id, ipAddress: req.ip });
   res.status(200).json(caseItem);
@@ -48,9 +48,9 @@ export const updateCase = asyncHandler(async (req: Request, res: Response) => {
 export const deleteCase = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user) return res.status(401).json({ message: 'Not authorized' });
   const user = req.user as IUser;
-  const caseItem = await caseService.deleteCase(req.params.id, user._id);
+  const caseItem = await caseService.deleteCase(req.params.id, user);
   if (!caseItem) {
-    return res.status(404).json({ message: 'Case not found' });
+    return res.status(404).json({ message: 'Case not found or not authorized' });
   }
   await logActivity({ user: user._id, action: 'DELETE_CASE', targetResourceId: caseItem._id, ipAddress: req.ip });
   res.status(200).json({ message: 'Case deleted successfully' });

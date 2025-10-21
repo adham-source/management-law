@@ -1,12 +1,6 @@
-
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import path from 'path';
 import chalk from 'chalk';
-
-// Load environment variables
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
-
+import { env } from '../config/env'; // Import centralized env
 import connectDB from '../config/db';
 import Permission from '../models/Permission.model';
 import Role from '../models/Role.model';
@@ -16,72 +10,63 @@ import User from '../models/User.model';
 const permissionsToCreate = [
   // User Management
   { name: 'user:create', description: 'Create new users' },
-  { name: 'user:read', description: 'Read user information' },
-  { name: 'user:update', description: 'Update user information' },
+  { name: 'user:read', description: 'Read user data' },
+  { name: 'user:update', description: 'Update user data' },
   { name: 'user:delete', description: 'Delete users' },
-  { name: 'user:manage', description: 'Manage all user operations' },
 
   // Role Management
   { name: 'role:create', description: 'Create new roles' },
-  { name: 'role:read', description: 'Read role information' },
-  { name: 'role:update', description: 'Update role information' },
+  { name: 'role:read', description: 'Read role data' },
+  { name: 'role:update', description: 'Update role data' },
   { name: 'role:delete', description: 'Delete roles' },
-  { name: 'role:manage', description: 'Manage all role operations' },
 
   // Permission Management
-  { name: 'permission:read', description: 'Read permission information' },
-  { name: 'permission:manage', description: 'Manage all permission operations' },
+  { name: 'permission:read', description: 'Read permission data' },
 
   // Case Management
   { name: 'case:create', description: 'Create new cases' },
-  { name: 'case:read', description: 'Read case information' },
-  { name: 'case:update', description: 'Update case information' },
+  { name: 'case:read', description: 'Read case data' },
+  { name: 'case:update', description: 'Update case data' },
   { name: 'case:delete', description: 'Delete cases' },
-  { name: 'case:manage', description: 'Manage all case operations' },
 
   // Client Management
   { name: 'client:create', description: 'Create new clients' },
-  { name: 'client:read', description: 'Read client information' },
-  { name: 'client:update', description: 'Update client information' },
+  { name: 'client:read', description: 'Read client data' },
+  { name: 'client:update', description: 'Update client data' },
   { name: 'client:delete', description: 'Delete clients' },
-  { name: 'client:manage', description: 'Manage all client operations' },
-  
+
   // Document Management
-  { name: 'document:create', description: 'Create new documents' },
-  { name: 'document:read', description: 'Read document information' },
-  { name: 'document:update', description: 'Update document information' },
+  { name: 'document:create', description: 'Upload documents' },
+  { name: 'document:read', description: 'Read/Download documents' },
   { name: 'document:delete', description: 'Delete documents' },
-  { name: 'document:manage', description: 'Manage all document operations' },
 
   // Appointment Management
   { name: 'appointment:create', description: 'Create new appointments' },
-  { name: 'appointment:read', description: 'Read appointment information' },
-  { name: 'appointment:update', description: 'Update appointment information' },
+  { name: 'appointment:read', description: 'Read appointment data' },
+  { name: 'appointment:update', description: 'Update appointment data' },
   { name: 'appointment:delete', description: 'Delete appointments' },
-  { name: 'appointment:manage', description: 'Manage all appointment operations' },
 
   // Task Management
   { name: 'task:create', description: 'Create new tasks' },
-  { name: 'task:read', description: 'Read task information' },
-  { name: 'task:update', description: 'Update task information' },
+  { name: 'task:read', description: 'Read task data' },
+  { name: 'task:update', description: 'Update task data' },
   { name: 'task:delete', description: 'Delete tasks' },
-  { name: 'task:manage', description: 'Manage all task operations' },
 
-  // Financial Management
-  { name: 'expense:create', description: 'Create expenses' },
-  { name: 'expense:read', description: 'Read expenses' },
+  // Financials
   { name: 'invoice:create', description: 'Create invoices' },
   { name: 'invoice:read', description: 'Read invoices' },
   { name: 'payment:create', description: 'Create payments' },
+  { name: 'expense:create', description: 'Create expenses' },
+  { name: 'expense:read', description: 'Read expenses' },
 
-  // Audit Management
+  // Audit
   { name: 'audit:read', description: 'Read audit logs' },
 ];
 
 const rolesToCreate = [
     {
         name: 'admin',
-        permissions: [], // Will be populated with all permissions
+        permissions: '__ALL__' // Special keyword for all permissions
     },
     {
         name: 'lawyer',
@@ -102,52 +87,65 @@ const seedDB = async () => {
     await connectDB();
     console.log(chalk.blue('Database connected for seeding...'));
 
-    // --- 1. Seed Permissions ---
-    console.log(chalk.yellow('Seeding permissions...'));
-    await Permission.deleteMany({});
-    const createdPermissions = await Permission.insertMany(permissionsToCreate);
-    console.log(chalk.green('Permissions seeded successfully!'));
+    // --- 1. Upsert Permissions (Non-destructive) ---
+    console.log(chalk.yellow('Upserting permissions...'));
+    const permissionPromises = permissionsToCreate.map(p => 
+        Permission.findOneAndUpdate(
+            { name: p.name }, 
+            { $setOnInsert: { description: p.description } }, 
+            { upsert: true, new: true }
+        )
+    );
+    const upsertedPermissions = await Promise.all(permissionPromises);
+    console.log(chalk.green('Permissions are up to date!'));
 
-    const permissionMap = new Map(createdPermissions.map(p => [p.name, p._id]));
+    const permissionMap = new Map(upsertedPermissions.map(p => [p.name, p._id]));
 
-    // --- 2. Seed Roles ---
-    console.log(chalk.yellow('Seeding roles...'));
-    await Role.deleteMany({});
-    
-    const rolesWithPermissionIds = rolesToCreate.map(role => {
-        let permissionIds;
-        if (role.name === 'admin') {
-            // Admin gets all permissions
+    // --- 2. Upsert Roles (Non-destructive) ---
+    console.log(chalk.yellow('Upserting roles...'));
+    for (const roleData of rolesToCreate) {
+        let permissionIds: mongoose.Types.ObjectId[] = [];
+        if (roleData.permissions === '__ALL__') {
             permissionIds = [...permissionMap.values()];
-        } else {
-            permissionIds = role.permissions.map(name => permissionMap.get(name)).filter(id => id);
+        } else if (Array.isArray(roleData.permissions)) {
+            permissionIds = roleData.permissions
+                .map(name => permissionMap.get(name))
+                .filter((id): id is mongoose.Types.ObjectId => id !== undefined);
         }
-        return { name: role.name, permissions: permissionIds };
-    });
+        
+        await Role.findOneAndUpdate(
+            { name: roleData.name },
+            { $set: { permissions: permissionIds } }, // Use $set to update permissions if role exists
+            { upsert: true, new: true }
+        );
+    }
+    console.log(chalk.green('Roles are up to date!'));
 
-    const createdRoles = await Role.insertMany(rolesWithPermissionIds);
-    console.log(chalk.green('Roles seeded successfully!'));
+    // --- 3. Upsert Admin User (Non-destructive & Secure) ---
+    console.log(chalk.yellow('Upserting admin user...'));
 
-    const adminRole = createdRoles.find(r => r.name === 'admin');
-
-    // --- 3. Seed Admin User ---
-    console.log(chalk.yellow('Seeding admin user...'));
-    if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD || !process.env.ADMIN_NAME) {
-        throw new Error(chalk.red('Please provide ADMIN_NAME, ADMIN_EMAIL, and ADMIN_PASSWORD in your .env file'));
+    const adminRole = await Role.findOne({ name: 'admin' });
+    if (!adminRole) {
+        throw new Error(chalk.red('Admin role not found! Seeding cannot continue.'));
     }
 
-    await User.deleteOne({ email: process.env.ADMIN_EMAIL });
+    // Check if admin already exists
+    const existingAdmin = await User.findOne({ email: env.ADMIN_EMAIL });
 
-    const adminUser = new User({
-        name: process.env.ADMIN_NAME,
-        email: process.env.ADMIN_EMAIL,
-        password: process.env.ADMIN_PASSWORD,
-        role: adminRole?._id,
-        isVerified: true, // Admin is verified by default
-    });
-
-    await adminUser.save();
-    console.log(chalk.green('Admin user seeded successfully!'));
+    if (!existingAdmin) {
+        console.log(chalk.blue('Creating new admin user...'));
+        const adminUser = new User({
+            name: env.ADMIN_NAME,
+            email: env.ADMIN_EMAIL,
+            password: env.ADMIN_PASSWORD, // This will be hashed by the pre-save hook
+            role: adminRole._id,
+            isVerified: true,
+        });
+        await adminUser.save(); // .save() triggers the pre-save hook
+        console.log(chalk.green('Admin user created and password hashed successfully!'));
+    } else {
+        console.log(chalk.green('Admin user already exists. No action taken.'));
+    }
 
     console.log(chalk.bold.bgGreen('\nSEEDING COMPLETE! 🚀'));
 

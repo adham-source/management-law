@@ -3,6 +3,7 @@ import passport from 'passport';
 import * as authController from '../controllers/auth.controller';
 import validate from '../middlewares/validate';
 import { registerSchema, loginSchema, clientRegisterSchema, verifyEmailSchema } from '../validations/auth.validation';
+import { authorize } from '../middlewares/authorize';
 import { authLimiter } from '../middlewares/rateLimiter';
 
 const router = Router();
@@ -49,28 +50,24 @@ router.post('/register/client', authLimiter, validate(clientRegisterSchema), aut
 
 /**
  * @swagger
- * /auth/verify-email:
- *   post:
+ * /auth/verify-email/{token}:
+ *   get:
  *     summary: تفعيل حساب البريد الإلكتروني
  *     tags: [المصادقة (Authentication)]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - token
- *             properties:
- *               token:
- *                 type: string
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The verification token received in the email.
  *     responses:
  *       200:
  *         description: تم تفعيل الحساب بنجاح، مع إرجاع بيانات المستخدم ورموز الدخول.
  *       400:
  *         description: الرمز غير صالح أو انتهت صلاحيته.
  */
-router.post('/verify-email', authLimiter, validate(verifyEmailSchema), authController.verifyEmail);
+router.get('/verify-email/:token', authLimiter, authController.verifyEmail);
 
 /**
  * @swagger
@@ -172,7 +169,7 @@ router.post('/logout', passport.authenticate('jwt', { session: false }), authCon
  *         description: غير مصرح به (للمدير فقط).
  */
 // This route should be protected by an admin-only authorization middleware
-router.post('/register/user', passport.authenticate('jwt', { session: false }), /* authorize(['admin']), */ validate(registerSchema), authController.createUser);
+router.post('/register/user', passport.authenticate('jwt', { session: false }), authorize(['user:manage']), validate(registerSchema), authController.createUser);
 
 export default router;
 

@@ -1,22 +1,17 @@
 
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env';
 
-export const generateTokens = (userId: string) => {
-  // Access Token
-  const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-  if (!accessTokenSecret) throw new Error('ACCESS_TOKEN_SECRET is not defined');
-  const accessToken = jwt.sign({ id: userId }, accessTokenSecret, {
-    expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m',
+export const generateAccessToken = (userId: string): string => {
+  return jwt.sign({ id: userId }, env.ACCESS_TOKEN_SECRET, {
+    expiresIn: env.ACCESS_TOKEN_EXPIRES_IN,
   });
+};
 
-  // Refresh Token
-  const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
-  if (!refreshTokenSecret) throw new Error('REFRESH_TOKEN_SECRET is not defined');
-  const refreshToken = jwt.sign({ id: userId }, refreshTokenSecret, {
-    expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
+export const generateRefreshToken = (userId: string): string => {
+  return jwt.sign({ id: userId }, env.REFRESH_TOKEN_SECRET, {
+    expiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
   });
-
-  return { accessToken, refreshToken };
 };
 
 export const verifyToken = (token: string, secret: string) => {

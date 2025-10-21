@@ -1,10 +1,16 @@
 import Notification, { INotification } from '../models/Notification.model';
 import mongoose from 'mongoose';
-import { IUser } from '../models/User.model';
+import { getIO } from '../config/socket.config';
 
 // Create a notification
 export const createNotification = async (userId: mongoose.Types.ObjectId, message: string, link?: string): Promise<INotification> => {
-  return Notification.create({ user: userId, message, link });
+  const notification = await Notification.create({ user: userId, message, link });
+
+  // Emit a real-time event to the specific user
+  const io = getIO();
+  io.to(userId.toString()).emit('new_notification', notification);
+
+  return notification;
 };
 
 // Get notifications for a user

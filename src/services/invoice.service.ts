@@ -85,3 +85,7 @@ export const getInvoiceById = async (invoiceId: string): Promise<IInvoice | null
 export const getInvoicesForCase = async (caseId: string): Promise<IInvoice[]> => {
     return Invoice.find({ relatedCase: caseId });
 }
+
+export const getAllInvoices = async (filter: any, sort: any, limit: number, skip: number): Promise<IInvoice[]> => {
+    return Invoice.find(filter).populate('relatedCase', 'title').populate('relatedClient', 'name').sort(sort).limit(limit).skip(skip);
+};

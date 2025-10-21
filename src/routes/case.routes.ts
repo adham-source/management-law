@@ -24,9 +24,17 @@ router.use(passport.authenticate('jwt', { session: false }));
  *     tags: [القضايا (Cases)]
  *     security:
  *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CaseInput'
  *     responses:
  *       201:
  *         description: تم إنشاء القضية بنجاح.
+ *       401:
+ *         description: غير مصرح به.
  */
 router.post('/', authorize(['case:create']), validate(createCaseSchema), caseController.createCase);
 
@@ -41,6 +49,8 @@ router.post('/', authorize(['case:create']), validate(createCaseSchema), caseCon
  *     responses:
  *       200:
  *         description: قائمة بالقضايا.
+ *       401:
+ *         description: غير مصرح به.
  */
 router.get('/', authorize(['case:read']), caseController.getCases);
 
@@ -59,6 +69,8 @@ router.get('/', authorize(['case:read']), caseController.getCases);
  *     responses:
  *       200:
  *         description: بيانات القضية.
+ *       401:
+ *         description: غير مصرح به.
  */
 router.get('/:id', authorize(['case:read']), caseController.getCaseById);
 
@@ -77,6 +89,8 @@ router.get('/:id', authorize(['case:read']), caseController.getCaseById);
  *     responses:
  *       200:
  *         description: تم تحديث القضية بنجاح.
+ *       401:
+ *         description: غير مصرح به.
  */
 router.patch('/:id', authorize(['case:update']), validate(updateCaseSchema), caseController.updateCase);
 
@@ -95,7 +109,38 @@ router.patch('/:id', authorize(['case:update']), validate(updateCaseSchema), cas
  *     responses:
  *       200:
  *         description: تم حذف القضية بنجاح.
+ *       401:
+ *         description: غير مصرح به.
  */
 router.delete('/:id', authorize(['case:delete']), caseController.deleteCase);
 
 export default router;
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     CaseInput:
+ *       type: object
+ *       properties:
+ *         title:
+ *           type: string
+ *         caseNumber:
+ *           type: string
+ *         description:
+ *           type: string
+ *         caseType:
+ *           type: string
+ *         court:
+ *           type: string
+ *         clients:
+ *           type: array
+ *           items:
+ *             type: string
+ *             description: ID of a client
+ *         assignedLawyers:
+ *           type: array
+ *           items:
+ *             type: string
+ *             description: ID of a user (lawyer)
+ */

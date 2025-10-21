@@ -1,6 +1,6 @@
 
 # 1. Use an official Node.js runtime as a parent image
-FROM node:18-alpine
+FROM node:22-alpine
 
 # 2. Set the working directory in the container
 WORKDIR /usr/src/app
@@ -17,8 +17,15 @@ COPY . .
 # 6. Build the TypeScript code to JavaScript
 RUN npm run build
 
-# 7. Expose the port the app runs on
+# Copy the entrypoint script and make it executable
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+# Expose the port the app runs on
 EXPOSE 3000
 
-# 8. Define the command to run the application
+# Set the entrypoint script to be executed when the container starts
+ENTRYPOINT ["./entrypoint.sh"]
+
+# Define the command to run the application (which is passed to the entrypoint)
 CMD [ "node", "dist/server.js" ]

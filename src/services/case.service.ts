@@ -59,17 +59,25 @@ export const getCaseById = async (
 export const updateCase = async (
   caseId: string,
   update: Partial<ICase>,
-  userId: mongoose.Types.ObjectId
+  user: IUser
 ): Promise<ICase | null> => {
+  const userRole = user.role as IRole;
+  if (userRole.name === 'client') {
+    return null; // Clients are not allowed to update cases directly
+  }
   // Only lawyers/admins assigned to or who created the case can update
-  return Case.findOneAndUpdate({ _id: caseId, $or: [{ createdBy: userId }, { assignedLawyers: userId }] }, update, { new: true });
+  return Case.findOneAndUpdate({ _id: caseId, $or: [{ createdBy: user._id }, { assignedLawyers: user._id }] }, update, { new: true });
 };
 
 // Delete Case Service
 export const deleteCase = async (
   caseId: string,
-  userId: mongoose.Types.ObjectId
+  user: IUser
 ): Promise<ICase | null> => {
+  const userRole = user.role as IRole;
+  if (userRole.name === 'client') {
+    return null; // Clients are not allowed to delete cases
+  }
   // Only the creator (likely admin or senior lawyer) can delete
-  return Case.findOneAndDelete({ _id: caseId, createdBy: userId });
+  return Case.findOneAndDelete({ _id: caseId, createdBy: user._id });
 };

@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import passport from './config/passport';
+import connectDB from './config/db'; // Import connectDB function
 import authRoutes from './routes/auth.routes';
 import clientRoutes from './routes/client.routes';
 import caseRoutes from './routes/case.routes';
@@ -16,6 +17,7 @@ import notificationRoutes from './routes/notification.routes';
 import financialRoutes from './routes/financial.routes';
 import auditRoutes from './routes/audit.routes';
 import googleRoutes from './routes/google.routes';
+import permissionRoutes from './routes/permission.routes';
 import { startDeadlineChecker } from './jobs/deadlineChecker';
 import errorHandler from './middlewares/errorHandler';
 import swaggerUi from 'swagger-ui-express';
@@ -23,6 +25,9 @@ import swaggerSpec from './config/swagger.config';
 import { generalLimiter } from './middlewares/rateLimiter';
 
 const app: Application = express();
+
+// Connect to Database
+connectDB();
 
 // Middlewares
 app.use(helmet());
@@ -49,7 +54,7 @@ app.use('/api/v1', generalLimiter);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/roles', roleRoutes);
-// app.use('/api/v1/permissions', permissionRoutes); // Assuming you will create this
+app.use('/api/v1/permissions', permissionRoutes); // Enable permission routes
 app.use('/api/v1/clients', clientRoutes);
 app.use('/api/v1/cases', caseRoutes);
 app.use('/api/v1/documents', documentRoutes);

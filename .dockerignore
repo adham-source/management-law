@@ -9,3 +9,4 @@ docker-compose.yml
 .git
 .gitignore
 README.md
+.env.private

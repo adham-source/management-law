@@ -4,9 +4,19 @@ import mongoose from 'mongoose';
 import { IUser } from '../models/User.model';
 import { IRole } from '../models/Role.model';
 
+import { getIO } from '../config/socket.config';
+
 // Create Task
 export const createTask = async (input: Partial<ITask>, userId: mongoose.Types.ObjectId): Promise<ITask> => {
-  return Task.create({ ...input, createdBy: userId });
+  const task = await Task.create({ ...input, createdBy: userId });
+
+  // Emit a real-time event to the assigned user
+  if (task.assignedTo) {
+    const io = getIO();
+    io.to(task.assignedTo.toString()).emit('new_task', task);
+  }
+
+  return task;
 };
 
 // Get tasks with authorization

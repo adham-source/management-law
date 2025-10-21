@@ -7,6 +7,7 @@
 
 # Environment variables
 .env
+.env.private
 
 # Logs
 npm-debug.log*
@@ -27,3 +28,4 @@ npm-debug.log*
 GEMINI.md
 README-private.md
 RUNBOOK.md
+.env.use.docker

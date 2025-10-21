@@ -16,7 +16,6 @@ const router = Router();
 
 // Protect all role routes
 router.use(passport.authenticate('jwt', { session: false }));
-router.use(authorize(['role:manage']));
 
 /**
  * @swagger
@@ -30,7 +29,7 @@ router.use(authorize(['role:manage']));
  *       200:
  *         description: قائمة بجميع الأدوار.
  */
-router.get('/', roleController.getAllRoles);
+router.get('/', authorize(['role:read']), roleController.getAllRoles);
 
 /**
  * @swagger
@@ -51,7 +50,7 @@ router.get('/', roleController.getAllRoles);
  *       404:
  *         description: الدور غير موجود.
  */
-router.get('/:id', roleController.getRoleById);
+router.get('/:id', authorize(['role:read']), roleController.getRoleById);
 
 /**
  * @swagger
@@ -79,7 +78,7 @@ router.get('/:id', roleController.getRoleById);
  *       201:
  *         description: تم إنشاء الدور بنجاح.
  */
-router.post('/', validate(createRoleSchema), roleController.createRole);
+router.post('/', authorize(['role:create']), validate(createRoleSchema), roleController.createRole);
 
 /**
  * @swagger
@@ -114,7 +113,7 @@ router.post('/', validate(createRoleSchema), roleController.createRole);
  *       404:
  *         description: الدور غير موجود.
  */
-router.patch('/:id', validate(updateRoleSchema), roleController.updateRole);
+router.patch('/:id', authorize(['role:update']), validate(updateRoleSchema), roleController.updateRole);
 
 /**
  * @swagger
@@ -135,6 +134,6 @@ router.patch('/:id', validate(updateRoleSchema), roleController.updateRole);
  *       404:
  *         description: الدور غير موجود.
  */
-router.delete('/:id', roleController.deleteRole);
+router.delete('/:id', authorize(['role:delete']), roleController.deleteRole);
 
 export default router;

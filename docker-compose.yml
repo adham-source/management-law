@@ -23,7 +23,7 @@ services:
     image: mongo:7.0
     container_name: law_office_mongo
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongo-data:/data/db
     environment:
@@ -37,7 +37,7 @@ services:
     image: redis:7-alpine
     container_name: law_office_redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis-data:/data
     networks:

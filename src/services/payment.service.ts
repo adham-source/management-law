@@ -20,3 +20,7 @@ export const recordPayment = async (input: Partial<IPayment>, userId: mongoose.T
 
     return payment;
 };
+
+export const getPaymentsForInvoice = async (invoiceId: string): Promise<IPayment[]> => {
+    return Payment.find({ invoice: invoiceId });
+};

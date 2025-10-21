@@ -1,30 +1,49 @@
 
 import http from 'http';
-import dotenv from 'dotenv';
 import app from './app';
-import connectDB from './config/db';
-import { initSocket } from './config/socket.config';
+import { env } from './config/env';
+import { configureSocket } from './config/socket.config';
+import jwt from 'jsonwebtoken';
 
-dotenv.config();
-
-const PORT = process.env.PORT || 5000;
-
+const PORT = env.PORT;
 const server = http.createServer(app);
 
-// Initialize Socket.IO
-initSocket(server);
+// Configure Socket.IO
+const io = configureSocket(server);
 
-const startServer = async () => {
-  try {
-    await connectDB();
-    server.listen(PORT, () => {
-      console.info(`Server is running on port ${PORT}`);
-      console.info(`Swagger docs available at http://localhost:${PORT}/api-docs`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
+// Socket.IO authentication middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error('Authentication error: Token not provided'));
   }
-};
 
-startServer();
+  jwt.verify(token, env.ACCESS_TOKEN_SECRET, (err: any, decoded: any) => {
+    if (err) {
+      return next(new Error('Authentication error: Invalid token'));
+    }
+    // Attach user id to the socket object for later use
+    socket.data.userId = decoded.id;
+    next();
+  });
+});
+
+// Handle new connections
+io.on('connection', (socket) => {
+  console.log(`New client connected: ${socket.id}`);
+
+  // Join a room based on the user ID from the authenticated token
+  const userId = socket.data.userId;
+  if (userId) {
+    socket.join(userId);
+    console.log(`User ${userId} with socket ${socket.id} joined their room.`);
+  }
+
+  socket.on('disconnect', () => {
+    console.log(`Client disconnected: ${socket.id}`);
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT} in ${env.NODE_ENV} mode`);
+});

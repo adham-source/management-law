@@ -2,8 +2,8 @@
 import { Request, Response } from 'express';
 import { IUser } from '../models/User.model';
 import * as authService from '../services/auth.service';
-import { generateTokens } from '../utils/jwt.utils';
 import asyncHandler from '../utils/asyncHandler';
+import { generateAccessToken, generateRefreshToken } from '../utils/jwt.utils';
 
 // Admin/Internal User Creation Controller
 export const createUser = asyncHandler(async (req: Request, res: Response) => {
@@ -19,7 +19,7 @@ export const clientRegister = asyncHandler(async (req: Request, res: Response) =
 
 // Verify Email Controller
 export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
-  const { token } = req.query;
+  const { token } = req.params;
   if (!token) {
     return res.status(400).json({ message: 'Verification token is required' });
   }
@@ -44,9 +44,11 @@ export const googleCallback = (req: Request, res: Response) => {
     if (!req.user) {
         return res.status(401).json({ message: 'User not authenticated' });
     }
-    const user = req.user as IUser; // Explicit type assertion
-    const tokens = generateTokens(user._id.toString());
-    res.status(200).json({ user, ...tokens });
+    const user = req.user as IUser;
+    const accessToken = generateAccessToken(user._id.toString());
+    const refreshToken = generateRefreshToken(user._id.toString());
+    // Here you should also save the refresh token to the user record in the DB
+    res.status(200).json({ user, accessToken, refreshToken });
 };
 
 // Refresh Access Token Controller
@@ -65,7 +67,7 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
   if (!req.user || !refreshToken) {
     return res.status(400).json({ message: 'User and refresh token are required' });
   }
-  const user = req.user as IUser; // Explicit type assertion
+  const user = req.user as IUser;
   await authService.logoutUser(user._id, refreshToken);
   res.status(200).json({ message: 'Logged out successfully' });
 });
