@@ -3,7 +3,7 @@ import passport from 'passport';
 import * as financialController from '../controllers/financial.controller';
 import validate from '../middlewares/validate';
 import { authorize } from '../middlewares/authorize';
-import { createExpenseSchema, createInvoiceSchema, recordPaymentSchema } from '../validations/financial.validation';
+import { createExpenseSchema, createInvoiceSchema, createPaymentSchema } from '../validations/financial.validation';
 
 const router = Router();
 
@@ -98,7 +98,7 @@ router.get('/invoices/:id', authorize(['invoice:read']), financialController.get
  *       401:
  *         description: غير مصرح به.
  */
-router.post('/payments', authorize(['payment:create']), validate(recordPaymentSchema), financialController.recordPayment);
+router.post('/payments', authorize(['payment:create']), validate(createPaymentSchema), financialController.recordPayment);
 
 /**
  * @swagger
@@ -174,7 +174,7 @@ export default router;
  *       properties:
  *         relatedCase:
  *           type: string
- *           description: ID of the case to generate the invoice for
+ *           description: معرف القضية لإنشاء الفاتورة لها
  *         dueDate:
  *           type: string
  *           format: date-time
@@ -191,7 +191,7 @@ export default router;
  *       properties:
  *         invoice:
  *           type: string
- *           description: ID of the invoice being paid
+ *           description: معرف الفاتورة التي يتم دفعها
  *         amount:
  *           type: number
  *         paymentDate:
@@ -213,6 +213,7 @@ export default router;
  *       properties:
  *         description:
  *           type: string
+ *           description: وصف المصروف
  *         amount:
  *           type: number
  *         date:
@@ -220,5 +221,5 @@ export default router;
  *           format: date-time
  *         relatedCase:
  *           type: string
- *           description: ID of the case this expense is for
+ *           description: معرف القضية التي يتبع لها هذا المصروف
  */

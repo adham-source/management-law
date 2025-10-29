@@ -1,35 +1,34 @@
 
 import { z } from 'zod';
-import { invoiceStatuses } from '../models/Invoice.model';
-import { paymentMethods } from '../models/Payment.model';
+import i18next from '../config/i18n.config';
 
-const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ID');
-
-export const createExpenseSchema = z.object({
-  body: z.object({
-    description: z.string().min(3),
-    amount: z.number().positive(),
-    date: z.string().datetime().optional(),
-    relatedCase: objectIdSchema,
-  }),
+const itemSchema = z.object({
+  description: z.string().min(1, i18next.t('validation:description_required')),
+  quantity: z.number().positive(i18next.t('validation:quantity_positive')),
+  price: z.number().positive(i18next.t('validation:price_positive')),
 });
 
 export const createInvoiceSchema = z.object({
   body: z.object({
-    relatedCase: objectIdSchema,
-    dueDate: z.string().datetime(),
-    tax: z.number().min(0).optional(),
-    notes: z.string().optional(),
+    clientId: z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_client_id')),
+    caseId: z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_case_id')).optional(),
+    items: z.array(itemSchema).min(1, i18next.t('validation:at_least_one_item')),
+    dueDate: z.string().datetime(i18next.t('validation:invalid_datetime')),
   }),
 });
 
-export const recordPaymentSchema = z.object({
+export const createPaymentSchema = z.object({
   body: z.object({
-    invoice: objectIdSchema,
-    amount: z.number().positive(),
-    paymentDate: z.string().datetime().optional(),
-    paymentMethod: z.enum(paymentMethods as [string, ...string[]]),
-    transactionId: z.string().optional(),
-    notes: z.string().optional(),
+    invoiceId: z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_invoice_id')),
+    amount: z.number().positive(i18next.t('validation:amount_positive')),
+    paymentMethod: z.string().min(1, i18next.t('validation:payment_method_required')),
+  }),
+});
+
+export const createExpenseSchema = z.object({
+  body: z.object({
+    caseId: z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_case_id')),
+    description: z.string().min(1, i18next.t('validation:description_required')),
+    amount: z.number().positive(i18next.t('validation:amount_positive')),
   }),
 });

@@ -3,12 +3,16 @@ class AppError extends Error {
     public statusCode: number;
     public status: string;
     public isOperational: boolean;
+    public i18nKey: string; // Store the i18n key
+    public i18nParams?: Record<string, any>; // Optional parameters for translation
 
-    constructor(message: string, statusCode: number) {
-        super(message);
+    constructor(i18nKey: string, statusCode: number, i18nParams?: Record<string, any>) {
+        super(i18nKey); // Pass the key as the base message
+        this.i18nKey = i18nKey;
         this.statusCode = statusCode;
         this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
-        this.isOperational = true; // To distinguish from programming errors
+        this.isOperational = true;
+        this.i18nParams = i18nParams;
 
         Error.captureStackTrace(this, this.constructor);
     }

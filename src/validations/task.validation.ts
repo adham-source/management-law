@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import { taskStatuses, taskPriorities, taskCategories } from '../models/Task.model';
+import i18next from '../config/i18n.config';
 
-const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ID');
+const objectIdSchema = z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_id'));
 
 export const createTaskSchema = z.object({
   body: z.object({
-    title: z.string().min(3, 'Title must be at least 3 characters'),
+    title: z.string().min(3, i18next.t('validation:title_min')),
     description: z.string().optional(),
     assignedTo: objectIdSchema,
     relatedCase: objectIdSchema.optional(),
@@ -33,6 +34,6 @@ export const updateTaskSchema = z.object({
 
 export const logHoursSchema = z.object({
     body: z.object({
-        hours: z.number().positive('Hours must be a positive number'),
+        hours: z.number().positive(i18next.t('validation:hours_positive')),
     }),
 });

@@ -11,7 +11,6 @@ export interface IUser extends Document {
   googleId?: string;
   hourlyRate?: number;
   role: IRole | mongoose.Types.ObjectId; // Reference to Role model
-  refreshTokens?: string[];
   googleCalendarTokens?: {
     accessToken: string;
     refreshToken: string;
@@ -20,10 +19,15 @@ export interface IUser extends Document {
   isVerified: boolean;
   verificationToken?: string;
   verificationTokenExpires?: Date;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
+  tokenVersion: number;
+  passwordChangedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(password: string): Promise<boolean>;
   createVerificationToken(): string;
+  createPasswordResetToken(): string;
 }
 
 const UserSchema: Schema<IUser> = new Schema(
@@ -57,7 +61,6 @@ const UserSchema: Schema<IUser> = new Schema(
       ref: 'Role',
       required: true,
     },
-    refreshTokens: [String],
     googleCalendarTokens: {
       accessToken: { type: String },
       refreshToken: { type: String },
@@ -69,28 +72,44 @@ const UserSchema: Schema<IUser> = new Schema(
     },
     verificationToken: {
       type: String,
-      select: false, // Do not return this field
+      select: false,
     },
     verificationTokenExpires: {
       type: Date,
-      select: false, // Do not return this field
+      select: false,
+    },
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false,
+    },
+    tokenVersion: {
+      type: Number,
+      default: 0,
+    },
+    passwordChangedAt: {
+      type: Date,
     },
   },
   { timestamps: true }
 );
 
-// Pre-save hook to hash password
 UserSchema.pre<IUser>('save', async function (next) {
   if (!this.isModified('password') || !this.password) {
     return next();
   }
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error: any) {
-    next(error);
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+
+  // If password is changed, and it's not a new user, update passwordChangedAt
+  if (!this.isNew) {
+    this.passwordChangedAt = new Date();
+    this.tokenVersion = this.tokenVersion + 1; // Increment token version on password change
   }
+  next();
 });
 
 // Method to compare password
@@ -109,10 +128,24 @@ UserSchema.methods.createVerificationToken = function (): string {
     .update(verificationToken)
     .digest('hex');
 
-  // Set token to expire in 10 minutes
-  this.verificationTokenExpires = Date.now() + 10 * 60 * 1000;
+  this.verificationTokenExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
   return verificationToken;
+};
+
+// Method to create password reset token
+UserSchema.methods.createPasswordResetToken = function (): string {
+  const crypto = require('crypto');
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  return resetToken;
 };
 
 const User = mongoose.model<IUser>('User', UserSchema);

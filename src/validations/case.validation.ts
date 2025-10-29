@@ -1,6 +1,7 @@
 
 import { z } from 'zod';
 import { caseTypes, caseStatuses } from '../models/Case.model';
+import i18next from '../config/i18n.config';
 
 const opponentSchema = z.object({
   name: z.string(),
@@ -10,19 +11,19 @@ const opponentSchema = z.object({
 const timelineEventSchema = z.object({
   date: z.string().datetime(),
   description: z.string(),
-  createdBy: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid user ID'),
+  createdBy: z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_user_id')),
 });
 
 export const createCaseSchema = z.object({
   body: z.object({
-    caseNumber: z.string().min(1, 'Case number is required'),
-    title: z.string().min(3, 'Title must be at least 3 characters'),
+    caseNumber: z.string().min(1, i18next.t('validation:case_number_required')),
+    title: z.string().min(3, i18next.t('validation:title_min')),
     description: z.string().optional(),
     caseType: z.enum(caseTypes as [string, ...string[]]),
     status: z.enum(caseStatuses as [string, ...string[]]).optional(),
     court: z.string().optional(),
-    clients: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid client ID')).min(1, 'At least one client is required'),
-    assignedLawyers: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid lawyer ID')).min(1, 'At least one lawyer is required'),
+    clients: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_client_id'))).min(1, i18next.t('validation:at_least_one_client')),
+    assignedLawyers: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_lawyer_id'))).min(1, i18next.t('validation:at_least_one_lawyer')),
     openingDate: z.string().datetime().optional(),
     closingDate: z.string().datetime().optional(),
     opponents: z.array(opponentSchema).optional(),
@@ -38,8 +39,8 @@ export const updateCaseSchema = z.object({
     caseType: z.enum(caseTypes as [string, ...string[]]).optional(),
     status: z.enum(caseStatuses as [string, ...string[]]).optional(),
     court: z.string().optional(),
-    clients: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid client ID')).min(1).optional(),
-    assignedLawyers: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid lawyer ID')).min(1).optional(),
+    clients: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_client_id'))).min(1).optional(),
+    assignedLawyers: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, i18next.t('validation:invalid_lawyer_id'))).min(1).optional(),
     openingDate: z.string().datetime().optional(),
     closingDate: z.string().datetime().optional(),
     opponents: z.array(opponentSchema).optional(),

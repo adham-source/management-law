@@ -7,23 +7,31 @@ services:
     build: .
     container_name: law_office_app
     ports:
-      - "3000:3000"
+      - "${APP_PORT:-4000}:3000"
     volumes:
       - ./uploads:/usr/src/app/uploads
     env_file:
       - .env
     depends_on:
-      - mongo
-      - redis
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - law-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
 
   # MongoDB Database Service
   mongo:
     image: mongo:7.0
     container_name: law_office_mongo
     ports:
-      - "27018:27017"
+      - "${MONGO_PORT:-27018}:27017"
     volumes:
       - mongo-data:/data/db
     environment:
@@ -31,6 +39,17 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     networks:
       - law-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
 
   # Redis Caching Service
   redis:
@@ -42,6 +61,17 @@ services:
       - redis-data:/data
     networks:
       - law-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
 
 # Define the network
 networks:

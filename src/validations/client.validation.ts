@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import i18next from '../config/i18n.config';
 
 // --- Egyptian National ID Validator ---
 const governorateCodes = new Set([
@@ -34,7 +35,7 @@ const isValidEgyptianNID = (nid: string): boolean => {
 };
 
 const egyptianNIDSchema = z.string().refine(isValidEgyptianNID, {
-    message: 'Invalid Egyptian National ID',
+    message: i18next.t('validation:invalid_egyptian_nid'),
 });
 
 // --- Schemas ---
@@ -47,24 +48,24 @@ const addressSchema = z.object({
 });
 
 const contactPersonSchema = z.object({
-    name: z.string().min(3, 'Contact person name must be at least 3 characters'),
-    email: z.string().email('Invalid email address').optional(),
+    name: z.string().min(3, i18next.t('validation:contact_person_name_min')),
+    email: z.string().email(i18next.t('validation:invalid_email')).optional(),
     phone: z.string(),
 });
 
 const emergencyContactSchema = z.object({
-    name: z.string().min(3, 'Emergency contact name must be at least 3 characters'),
+    name: z.string().min(3, i18next.t('validation:emergency_contact_name_min')),
     relationship: z.string(),
     phone: z.string(),
 });
 
 export const createClientSchema = z.object({
   body: z.object({
-    name: z.string().min(3, 'Name must be at least 3 characters'),
+    name: z.string().min(3, i18next.t('validation:name_min')),
     nationalId: egyptianNIDSchema.optional(),
     address: addressSchema.optional(),
-    phoneNumbers: z.array(z.string()).min(1, 'At least one phone number is required'),
-    email: z.string().email('Invalid email address').optional(),
+    phoneNumbers: z.array(z.string()).min(1, i18next.t('validation:at_least_one_phone')),
+    email: z.string().email(i18next.t('validation:invalid_email')).optional(),
     clientType: z.enum(['individual', 'corporate']),
     contactPerson: contactPersonSchema.optional(),
     emergencyContact: emergencyContactSchema.optional(),
@@ -74,16 +75,16 @@ export const createClientSchema = z.object({
         return false;
     }
     return true;
-  }, { message: 'Contact person is required for corporate clients' })
+  }, { message: i18next.t('validation:contact_person_required_for_corporate') })
 });
 
 export const updateClientSchema = z.object({
   body: z.object({
-    name: z.string().min(3, 'Name must be at least 3 characters').optional(),
+    name: z.string().min(3, i18next.t('validation:name_min')).optional(),
     nationalId: egyptianNIDSchema.optional(),
     address: addressSchema.optional(),
-    phoneNumbers: z.array(z.string()).min(1, 'At least one phone number is required').optional(),
-    email: z.string().email('Invalid email address').optional(),
+    phoneNumbers: z.array(z.string()).min(1, i18next.t('validation:at_least_one_phone')).optional(),
+    email: z.string().email(i18next.t('validation:invalid_email')).optional(),
     clientType: z.enum(['individual', 'corporate']).optional(),
     contactPerson: contactPersonSchema.optional(),
     emergencyContact: emergencyContactSchema.optional(),

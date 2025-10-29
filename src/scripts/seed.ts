@@ -13,6 +13,7 @@ const permissionsToCreate = [
   { name: 'user:read', description: 'Read user data' },
   { name: 'user:update', description: 'Update user data' },
   { name: 'user:delete', description: 'Delete users' },
+  { name: 'user:manage', description: 'Manage users (create, update, delete)' },
 
   // Role Management
   { name: 'role:create', description: 'Create new roles' },
@@ -74,7 +75,7 @@ const rolesToCreate = [
     },
     {
         name: 'secretary',
-        permissions: ['appointment:manage', 'client:create', 'client:read'],
+        permissions: ['appointment:create', 'appointment:read', 'appointment:update', 'client:create', 'client:read'],
     },
     {
         name: 'client',

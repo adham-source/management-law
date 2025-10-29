@@ -1,6 +1,8 @@
 
 import mongoose, { Schema, Document } from 'mongoose';
 
+export const appointmentStatuses = ['scheduled', 'completed', 'canceled', 'rescheduled'] as const;
+
 export interface IAppointment extends Document {
   _id: mongoose.Types.ObjectId;
   title: string;
@@ -54,7 +56,7 @@ const AppointmentSchema: Schema<IAppointment> = new Schema(
     },
     status: {
         type: String,
-        enum: ['scheduled', 'completed', 'canceled', 'rescheduled'],
+        enum: appointmentStatuses,
         default: 'scheduled',
         index: true,
     },

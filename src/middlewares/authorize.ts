@@ -33,6 +33,7 @@ export const authorize = (requiredPermissions: string[]) => async (req: Request,
     const hasPermission = requiredPermissions.every(permission =>
       userPermissions.includes(permission)
     );
+    console.log('User Permissions:', userPermissions);
 
     if (!hasPermission) {
       return res.status(403).json({ message: 'Forbidden: You do not have the required permissions' });

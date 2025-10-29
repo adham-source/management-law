@@ -11,6 +11,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().default(5000),
   FRONTEND_URL: z.string().url(),
+  API_BASE_URL: z.string().url(),
 
   // Database
   MONGO_URI: z.string().min(1),

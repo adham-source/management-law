@@ -2,7 +2,7 @@ import { Router } from 'express';
 import passport from 'passport';
 import * as authController from '../controllers/auth.controller';
 import validate from '../middlewares/validate';
-import { registerSchema, loginSchema, clientRegisterSchema, verifyEmailSchema } from '../validations/auth.validation';
+import { registerSchema, loginSchema, clientRegisterSchema, verifyEmailSchema, forgotPasswordSchema, resetPasswordSchema } from '../validations/auth.validation';
 import { authorize } from '../middlewares/authorize';
 import { authLimiter } from '../middlewares/rateLimiter';
 
@@ -60,7 +60,7 @@ router.post('/register/client', authLimiter, validate(clientRegisterSchema), aut
  *         required: true
  *         schema:
  *           type: string
- *         description: The verification token received in the email.
+ *         description: رمز التحقق الذي تم استلامه في البريد الإلكتروني.
  *     responses:
  *       200:
  *         description: تم تفعيل الحساب بنجاح، مع إرجاع بيانات المستخدم ورموز الدخول.
@@ -92,6 +92,64 @@ router.get('/verify-email/:token', authLimiter, authController.verifyEmail);
  *         description: بيانات الدخول غير صحيحة أو الحساب غير مفعل.
  */
 router.post('/login', authLimiter, validate(loginSchema), authController.login);
+
+/**
+ * @swagger
+ * /auth/forgot-password:
+ *   post:
+ *     summary: طلب إعادة تعيين كلمة المرور
+ *     tags: [المصادقة (Authentication)]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: إذا كان البريد الإلكتروني موجودًا، سيتم إرسال رابط لإعادة التعيين.
+ */
+router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), authController.forgotPassword);
+
+/**
+ * @swagger
+ * /auth/reset-password/{token}:
+ *   post:
+ *     summary: إعادة تعيين كلمة المرور
+ *     tags: [المصادقة (Authentication)]
+ *     parameters:
+ *       - in: path
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [password, passwordConfirmation]
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               passwordConfirmation:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: تم تغيير كلمة المرور بنجاح.
+ *       400:
+ *         description: الرمز غير صالح أو انتهت صلاحيته.
+ */
+router.post('/reset-password/:token', authLimiter, validate(resetPasswordSchema), authController.resetPassword);
+
 
 /**
  * @swagger
@@ -145,6 +203,21 @@ router.post('/refresh-token', authController.refreshToken);
  */
 router.post('/logout', passport.authenticate('jwt', { session: false }), authController.logout);
 
+/**
+ * @swagger
+ * /auth/logout-all-devices:
+ *   post:
+ *     summary: تسجيل الخروج من جميع الأجهزة
+ *     tags: [المصادقة (Authentication)]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: تم تسجيل الخروج من جميع الأجهزة بنجاح.
+ *       401:
+ *         description: غير مصرح به.
+ */
+router.post('/logout-all-devices', passport.authenticate('jwt', { session: false }), authController.logoutAllDevices);
 
 // --- Routes for Admin --- //
 

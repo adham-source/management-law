@@ -5,6 +5,7 @@ import * as userController from '../controllers/user.controller';
 import validate from '../middlewares/validate';
 import { authorize } from '../middlewares/authorize';
 import { createUserSchema, updateUserSchema } from '../validations/user.validation';
+import { updatePasswordByAdminSchema, updateMyPasswordSchema } from '../validations/auth.validation';
 
 const router = Router();
 
@@ -61,6 +62,48 @@ router.get('/:id', authorize(['user:read']), userController.getUserById);
 
 /**
  * @swagger
+ * /users/me/password:
+ *   patch:
+ *     summary: تحديث كلمة مرور المستخدم الحالي
+ *     tags: [المستخدمون (Users)]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *               - newPasswordConfirmation
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 format: password
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *               newPasswordConfirmation:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: تم تحديث كلمة المرور بنجاح.
+ *       400:
+ *         description: خطأ في المدخلات أو كلمة المرور الحالية غير صحيحة.
+ *       401:
+ *         description: غير مصرح به.
+ */
+router.patch(
+  '/me/password',
+  validate(updateMyPasswordSchema),
+  userController.updateMyPassword
+);
+
+/**
+ * @swagger
  * /users:
  *   post:
  *     summary: إنشاء مستخدم جديد (للمدير فقط)
@@ -80,6 +123,54 @@ router.get('/:id', authorize(['user:read']), userController.getUserById);
  *         description: غير مصرح به.
  */
 router.post('/', authorize(['user:create']), validate(createUserSchema), userController.createUser);
+
+/**
+ * @swagger
+ * /users/{id}/password:
+ *   patch:
+ *     summary: تحديث كلمة مرور مستخدم بواسطة المدير
+ *     tags: [المستخدمون (Users)]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID المستخدم
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - password
+ *               - passwordConfirmation
+ *             properties:
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               passwordConfirmation:
+ *                 type: string
+ *                 format: password
+ *     responses:
+ *       200:
+ *         description: تم تحديث كلمة المرور بنجاح.
+ *       400:
+ *         description: خطأ في المدخلات أو عدم تطابق كلمات المرور.
+ *       403:
+ *         description: غير مصرح به.
+ *       404:
+ *         description: المستخدم غير موجود.
+ */
+router.patch(
+  '/:id/password',
+  authorize(['user:update']),
+  validate(updatePasswordByAdminSchema),
+  userController.updateUserPassword
+);
 
 /**
  * @swagger

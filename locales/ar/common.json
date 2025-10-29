@@ -1,0 +1,12 @@
+{
+  "registration_successful": "تم التسجيل بنجاح. يرجى مراجعة بريدك الإلكتروني لتفعيل حسابك.",
+  "login_successful": "تم تسجيل الدخول بنجاح.",
+  "logout_successful": "تم تسجيل الخروج بنجاح.",
+  "token_refreshed": "تم تحديث رمز الوصول بنجاح.",
+  "email_verified": "تم تفعيل حسابك بنجاح.",
+  "password_reset_email_sent": "إذا كان البريد الإلكتروني موجودًا، فقد تم إرسال رابط إعادة تعيين كلمة المرور.",
+  "password_reset_successful": "تم إعادة تعيين كلمة المرور بنجاح.",
+  "password_updated_successfully": "تم تحديث كلمة المرور بنجاح.",
+  "user_deleted_successful": "تم حذف المستخدم بنجاح.",
+  "logout_all_devices_successful": "تم تسجيل الخروج من جميع الأجهزة بنجاح."
+}

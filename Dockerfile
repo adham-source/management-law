@@ -1,31 +1,47 @@
+# Stage 1: Build the application
+FROM node:22-alpine AS builder
 
-# 1. Use an official Node.js runtime as a parent image
-FROM node:22-alpine
-
-# 2. Set the working directory in the container
 WORKDIR /usr/src/app
 
-# 3. Copy package.json and package-lock.json to the working directory
+# Copy package files and install all dependencies (including dev)
 COPY package*.json ./
-
-# 4. Install application dependencies
 RUN npm install
 
-# 5. Copy the rest of the application source code
+# Copy the rest of the source code
 COPY . .
 
-# 6. Build the TypeScript code to JavaScript
+# Build the TypeScript code
 RUN npm run build
 
-# Copy the entrypoint script and make it executable
-COPY entrypoint.sh .
+# Stage 2: Create the production image
+FROM node:22-alpine
+
+WORKDIR /usr/src/app
+
+# Create a non-root user and group
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Copy only production dependencies definitions
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm install --omit=dev
+
+# Copy the built application from the builder stage
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Copy the entrypoint script and give ownership to the new user
+COPY --chown=appuser:appgroup entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-# Expose the port the app runs on
+# Switch to the non-root user
+USER appuser
+
+# Expose the port
 EXPOSE 3000
 
-# Set the entrypoint script to be executed when the container starts
+# Set the entrypoint
 ENTRYPOINT ["./entrypoint.sh"]
 
-# Define the command to run the application (which is passed to the entrypoint)
+# Define the default command
 CMD [ "node", "dist/server.js" ]

@@ -2,9 +2,8 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import morgan from 'morgan';
+import logger from './utils/logger';
 import passport from './config/passport';
-import connectDB from './config/db'; // Import connectDB function
 import authRoutes from './routes/auth.routes';
 import clientRoutes from './routes/client.routes';
 import caseRoutes from './routes/case.routes';
@@ -17,22 +16,58 @@ import notificationRoutes from './routes/notification.routes';
 import financialRoutes from './routes/financial.routes';
 import auditRoutes from './routes/audit.routes';
 import googleRoutes from './routes/google.routes';
+import metadataRoutes from './routes/metadata.routes';
 import permissionRoutes from './routes/permission.routes';
 import { startDeadlineChecker } from './jobs/deadlineChecker';
 import errorHandler from './middlewares/errorHandler';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.config';
 import { generalLimiter } from './middlewares/rateLimiter';
+import morgan from 'morgan';
+
+import i18next from './config/i18n.config';
+import i18nextMiddleware from 'i18next-http-middleware';
 
 const app: Application = express();
 
-// Connect to Database
-connectDB();
+// i18n Middleware
+app.use(i18nextMiddleware.handle(i18next));
 
 // Middlewares
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"], // 'unsafe-inline' for Swagger UI
+        styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+        imgSrc: ["'self'", "data:"], // 'data:' for Swagger UI inline images
+        connectSrc: ["'self'"],
+        fontSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+    strictTransportSecurity: {
+      maxAge: 31536000, // 1 year
+      includeSubDomains: true,
+      preload: true,
+    },
+    referrerPolicy: { policy: "no-referrer" },
+    permissionsPolicy: {
+      policy: {
+        camera: ["'none'"],
+        geolocation: ["'none'"],
+        microphone: ["'none'"],
+        usb: ["'none'"],
+      },
+    },
+  } as any)
+);
 app.use(cors());
 app.use(express.json());
+
+// HTTP request logger middleware
 app.use(morgan('dev'));
 
 // Serve uploaded files statically
@@ -42,7 +77,7 @@ app.use('/uploads', express.static('uploads'));
 app.use(passport.initialize());
 
 // Swagger API Docs
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api/v1/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Health check route
 app.get('/api/health', (req: Request, res: Response) => {
@@ -64,6 +99,7 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/financials', financialRoutes);
 app.use('/api/v1/audit', auditRoutes);
 app.use('/api/v1/google', googleRoutes);
+app.use('/api/v1/metadata', metadataRoutes);
 
 // Start background jobs
 startDeadlineChecker();

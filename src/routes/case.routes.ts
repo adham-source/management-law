@@ -125,22 +125,27 @@ export default router;
  *       properties:
  *         title:
  *           type: string
+ *           description: عنوان القضية
  *         caseNumber:
  *           type: string
+ *           description: رقم القضية
  *         description:
  *           type: string
+ *           description: وصف تفصيلي للقضية (اختياري)
  *         caseType:
  *           type: string
+ *           description: نوع القضية
  *         court:
  *           type: string
+ *           description: المحكمة المختصة
  *         clients:
  *           type: array
  *           items:
  *             type: string
- *             description: ID of a client
+ *             description: معرف الموكل
  *         assignedLawyers:
  *           type: array
  *           items:
  *             type: string
- *             description: ID of a user (lawyer)
+ *             description: معرف المحامي المسؤول
  */

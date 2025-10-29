@@ -39,10 +39,7 @@ export const saveGoogleTokens = async (userId: mongoose.Types.ObjectId, code: st
         if (!tokens.refresh_token) {
             // This can happen if the user has already granted consent and is not re-prompted.
             // The `prompt: 'consent'` in generateAuthUrl helps mitigate this.
-            throw new AppError(
-                'Failed to obtain refresh token from Google. Please try removing app access from your Google account settings and re-authorizing.',
-                400
-            );
+            throw new AppError('errors:google_refresh_token_failed', 400);
         }
 
         await User.findByIdAndUpdate(userId, {
@@ -62,6 +59,6 @@ export const saveGoogleTokens = async (userId: mongoose.Types.ObjectId, code: st
             throw error;
         }
         console.error("Error in saveGoogleTokens:", error.response?.data || error.message);
-        throw new AppError('An error occurred while communicating with Google.', 500);
+        throw new AppError('errors:google_communication_error', 500);
     }
 };

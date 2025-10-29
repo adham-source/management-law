@@ -18,13 +18,6 @@ router.use(passport.authenticate('jwt', { session: false }));
 
 /**
  * @swagger
- * tags:
- *   name: الصلاحيات (Permissions)
- *   description: إدارة صلاحيات النظام (للمدير فقط)
- */
-
-/**
- * @swagger
  * /permissions:
  *   get:
  *     summary: جلب جميع الصلاحيات المتاحة
@@ -56,6 +49,7 @@ router.get('/', authorize(['permission:read']), permissionController.getAllPermi
  *                 type: string
  *               description:
  *                 type: string
+ *                 description: وصف الصلاحية (اختياري)
  *     responses:
  *       201:
  *         description: تم إنشاء الصلاحية بنجاح.

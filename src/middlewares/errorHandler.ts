@@ -3,31 +3,34 @@ import { Request, Response, NextFunction } from 'express';
 import { env } from '../config/env';
 import AppError from '../utils/AppError';
 
-const sendErrorDev = (err: AppError, res: Response) => {
+// A simple check to see if a string is likely a translation key
+const isTranslationKey = (str: string) => str.includes(':');
+
+const sendErrorDev = (err: AppError, req: Request, res: Response) => {
   res.status(err.statusCode).json({
     status: err.status,
     error: err,
-    message: err.message,
+    message: isTranslationKey(err.message) ? req.t(err.message) : err.message,
     stack: err.stack,
   });
 };
 
-const sendErrorProd = (err: AppError, res: Response) => {
-  // Operational, trusted error: send message to client
+const sendErrorProd = (err: AppError, req: Request, res: Response) => {
+  // Operational, trusted error: send translated message to client
   if (err.isOperational) {
     res.status(err.statusCode).json({
       status: err.status,
-      message: err.message,
+      message: isTranslationKey(err.message) ? req.t(err.message) : err.message,
     });
   // Programming or other unknown error: don't leak error details
   } else {
     // 1) Log error
     console.error('ERROR 💥', err);
 
-    // 2) Send generic message
+    // 2) Send generic translated message
     res.status(500).json({
       status: 'error',
-      message: 'Something went very wrong!',
+      message: req.t('errors:something_went_wrong'),
     });
   }
 };
@@ -37,14 +40,14 @@ const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunc
   err.status = err.status || 'error';
 
   if (env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (env.NODE_ENV === 'production') {
     // Create a hard copy of the error object to avoid mutations
     let error = { ...err, name: err.name, message: err.message, stack: err.stack };
 
     // You can add handlers for specific error names here (e.g., CastError, ValidationError)
 
-    sendErrorProd(error, res);
+    sendErrorProd(error, req, res);
   }
 };
 

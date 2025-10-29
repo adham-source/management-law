@@ -128,55 +128,67 @@ export default router;
  *       properties:
  *         title:
  *           type: string
+ *           description: عنوان المهمة
  *         description:
  *           type: string
+ *           description: وصف تفصيلي للمهمة (اختياري)
  *         assignedTo:
  *           type: string
- *           description: ID of the user the task is assigned to
+ *           description: معرف المستخدم المسندة إليه المهمة
  *         relatedCase:
  *           type: string
- *           description: ID of the related case
+ *           description: معرف القضية المرتبطة بالمهمة (اختياري)
  *         relatedClient:
  *           type: string
- *           description: ID of the related client
+ *           description: معرف العميل المرتبط بالمهمة (اختياري)
  *         dueDate:
  *           type: string
  *           format: date-time
+ *           description: تاريخ استحقاق المهمة (اختياري)
  *         status:
  *           type: string
  *           enum: [pending, in-progress, completed, on-hold]
+ *           description: حالة المهمة
  *         priority:
  *           type: string
  *           enum: [low, medium, high, critical]
+ *           description: أولوية المهمة
  *         category:
  *           type: string
  *           enum: [research, drafting, filing, client-meeting, court-appearance]
+ *           description: فئة المهمة
  *     TaskUpdateInput:
  *       type: object
  *       properties:
  *         title:
  *           type: string
+ *           description: عنوان المهمة (اختياري)
  *         description:
  *           type: string
+ *           description: وصف تفصيلي للمهمة (اختياري)
  *         assignedTo:
  *           type: string
- *           description: ID of the user the task is assigned to
+ *           description: معرف المستخدم المسندة إليه المهمة (اختياري)
  *         relatedCase:
  *           type: string
- *           description: ID of the related case
+ *           description: معرف القضية المرتبطة بالمهمة (اختياري)
  *         relatedClient:
  *           type: string
- *           description: ID of the related client
+ *           description: معرف العميل المرتبط بالمهمة (اختياري)
  *         dueDate:
  *           type: string
  *           format: date-time
+ *           description: تاريخ استحقاق المهمة (اختياري)
  *         status:
  *           type: string
  *           enum: [pending, in-progress, completed, on-hold]
+ *           description: حالة المهمة (اختياري)
  *         priority:
  *           type: string
  *           enum: [low, medium, high, critical]
+ *           description: أولوية المهمة (اختياري)
  *         category:
  *           type: string
  *           enum: [research, drafting, filing, client-meeting, court-appearance]
+ *           description: فئة المهمة (اختياري)
  */

@@ -1,0 +1,43 @@
+{
+  "case_type_civil": "مدني",
+  "case_type_criminal": "جنائي",
+  "case_type_commercial": "تجاري",
+  "case_type_personal_status": "أحوال شخصية",
+  "case_type_administrative": "إداري",
+  "case_type_labor": "عمالي",
+
+  "case_status_pending": "معلقة",
+  "case_status_in_progress": "قيد التنفيذ",
+  "case_status_completed": "مكتملة",
+  "case_status_archived": "مؤرشفة",
+
+  "task_status_pending": "معلقة",
+  "task_status_in_progress": "قيد التنفيذ",
+  "task_status_completed": "مكتملة",
+  "task_status_on_hold": "في الانتظار",
+
+  "task_priority_low": "منخفضة",
+  "task_priority_medium": "متوسطة",
+  "task_priority_high": "عالية",
+  "task_priority_critical": "حرجة",
+
+  "task_category_research": "بحث",
+  "task_category_drafting": "صياغة مستندات",
+  "task_category_filing": "إيداع ملفات",
+  "task_category_client_meeting": "اجتماع مع الموكل",
+  "task_category_court_appearance": "حضور جلسة محكمة",
+
+  "appointment_status_scheduled": "مجدول",
+  "appointment_status_completed": "مكتمل",
+  "appointment_status_canceled": "ملغي",
+  "appointment_status_rescheduled": "معاد جدولته",
+
+  "invoice_status_draft": "مسودة",
+  "invoice_status_sent": "مرسلة",
+  "invoice_status_paid": "مدفوعة",
+  "invoice_status_void": "لاغية",
+  "invoice_status_overdue": "متأخرة",
+
+  "invoice_source_type_task": "مهمة",
+  "invoice_source_type_expense": "مصروف"
+}

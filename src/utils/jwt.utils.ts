@@ -8,8 +8,8 @@ export const generateAccessToken = (userId: string): string => {
   });
 };
 
-export const generateRefreshToken = (userId: string): string => {
-  return jwt.sign({ id: userId }, env.REFRESH_TOKEN_SECRET, {
+export const generateRefreshToken = (userId: string, tokenVersion: number): string => {
+  return jwt.sign({ id: userId, tokenVersion }, env.REFRESH_TOKEN_SECRET, {
     expiresIn: env.REFRESH_TOKEN_EXPIRES_IN,
   });
 };

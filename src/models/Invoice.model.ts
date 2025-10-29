@@ -1,7 +1,8 @@
 
 import mongoose, { Schema, Document } from 'mongoose';
 
-export const invoiceStatuses = ['draft', 'sent', 'paid', 'void', 'overdue'];
+export const invoiceStatuses = ['draft', 'sent', 'paid', 'void', 'overdue'] as const;
+export const invoiceSourceTypes = ['task', 'expense'] as const;
 
 export interface IInvoice extends Document {
   _id: mongoose.Types.ObjectId;
@@ -45,7 +46,7 @@ const InvoiceSchema: Schema<IInvoice> = new Schema(
         unitPrice: { type: Number, required: true },
         total: { type: Number, required: true },
         source: {
-            type: { type: String, enum: ['task', 'expense'], required: true },
+            type: { type: String, enum: invoiceSourceTypes, required: true },
             id: { type: Schema.Types.ObjectId, required: true }
         }
       },
